@@ -1,4 +1,5 @@
 import 'package:app_imc/input_widget.dart';
+import 'package:app_imc/result_page.dart';
 import 'package:flutter/material.dart';
 
 // 254 linhas
@@ -14,9 +15,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Flutter Demo',
-
       theme: ThemeData(colorScheme: .fromSeed(seedColor: Colors.deepPurple)),
-
       home: const MyHomePage(title: 'Flutter Demo Home Page'),
     );
   }
@@ -104,6 +103,7 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
       body: Center(
         child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             SizedBox(height: 50),
@@ -122,7 +122,18 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
             SizedBox(height: 50),
             ElevatedButton(
-              onPressed: () => atualizarResultado(),
+              onPressed: () {
+                atualizarResultado();
+                Navigator.of(context).push(
+                  MaterialPageRoute<void>(
+                    builder: (context) => ResultPage(
+                      resultado: resultado,
+                      limite_inferior: limite_inferior,
+                      limite_superior: limite_superior,
+                    ),
+                  ),
+                );
+              },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.black,
                 foregroundColor: Colors.white,
@@ -138,23 +149,22 @@ class _MyHomePageState extends State<MyHomePage> {
                 ),
               ),
             ),
-            SizedBox(height: 50),
-            Text(
-              'Resultado:',
-              style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
-            ),
-            SizedBox(height: 50),
-            Text(
-              resultado,
-              style: TextStyle(fontSize: 35, fontWeight: FontWeight.bold),
-            ),
-            Text(
-              'Entre $limite_inferior e $limite_superior',
-              style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
-            ),
           ],
         ),
       ),
     );
   }
 }
+
+
+/*
+  Navigator.of(context).push(
+    MaterialPageRoute<void>(
+      builder: (context) => const SecondScreen(),
+    ),
+  );
+*/
+
+/*
+  Navigator.of(context).pop();
+*/
