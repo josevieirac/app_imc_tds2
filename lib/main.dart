@@ -1,8 +1,8 @@
 import 'package:app_imc/input_widget.dart';
 import 'package:app_imc/result_page.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-// 254 linhas
 void main() {
   runApp(const MyApp());
 }
@@ -36,6 +36,26 @@ class _MyHomePageState extends State<MyHomePage> {
   String resultado = 'NORMAL';
   double limite_inferior = 0;
   double limite_superior = 0;
+  late final SharedPreferences prefs;
+
+  bool isLoading = false;
+
+  @override
+  void initState() {
+    setState(() {
+      isLoading = true;
+    });
+    super.initState();
+    // prefs = await SharedPreferences.getInstance();
+    SharedPreferences.getInstance().then((value) {
+      prefs = value;
+      setState(() {
+        altura = prefs.getInt('altura') ?? 170;
+        peso = prefs.getInt('peso') ?? 65;
+        isLoading = false;
+      });      
+    });
+  }
 
   double calcularIMC() {
     int conversorAltura = 100;
@@ -102,7 +122,7 @@ class _MyHomePageState extends State<MyHomePage> {
         ),
       ),
       body: Center(
-        child: Column(
+        child: isLoading ? CircularProgressIndicator(color: Colors.black,) : Column(
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
@@ -122,7 +142,7 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
             SizedBox(height: 50),
             ElevatedButton(
-              onPressed: () {
+              onPressed: () async {
                 atualizarResultado();
                 Navigator.of(context).push(
                   MaterialPageRoute<void>(
@@ -133,6 +153,8 @@ class _MyHomePageState extends State<MyHomePage> {
                     ),
                   ),
                 );
+                await prefs.setInt('altura', altura);
+                await prefs.setInt('peso', peso);
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.black,
@@ -155,16 +177,3 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 }
-
-
-/*
-  Navigator.of(context).push(
-    MaterialPageRoute<void>(
-      builder: (context) => const SecondScreen(),
-    ),
-  );
-*/
-
-/*
-  Navigator.of(context).pop();
-*/
