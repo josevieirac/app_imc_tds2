@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "463779345131",
+    "project_id": "app-calculo-imc-2",
+    "storage_bucket": "app-calculo-imc-2.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:463779345131:android:6ecf30ff22938c3b3104ae",
+        "android_client_info": {
+          "package_name": "com.example.app_imc"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDkUi0uBbzMqLZk3c37w5djNp4bwEDEXD8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

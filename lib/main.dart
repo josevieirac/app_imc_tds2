@@ -1,9 +1,14 @@
 import 'package:app_imc/input_widget.dart';
 import 'package:app_imc/result_page.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
 
-void main() {
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   runApp(const MyApp());
 }
 
@@ -37,6 +42,8 @@ class _MyHomePageState extends State<MyHomePage> {
   double limite_inferior = 0;
   double limite_superior = 0;
   late final SharedPreferences prefs;
+  FirebaseFirestore db = FirebaseFirestore.instance;
+  int counter = 1;
 
   bool isLoading = false;
 
@@ -53,7 +60,7 @@ class _MyHomePageState extends State<MyHomePage> {
         altura = prefs.getInt('altura') ?? 170;
         peso = prefs.getInt('peso') ?? 65;
         isLoading = false;
-      });      
+      });
     });
   }
 
@@ -78,10 +85,10 @@ class _MyHomePageState extends State<MyHomePage> {
     altura++;
   });
 
-  void atualizarResultado() {
-    setState(() {
-      double imc = calcularIMC();
+  double atualizarResultado() {
+    double imc = calcularIMC();
 
+    setState(() {
       if (imc < 18.5) {
         resultado = 'BAIXO PESO';
         limite_inferior = 0;
@@ -108,6 +115,8 @@ class _MyHomePageState extends State<MyHomePage> {
         limite_superior = double.infinity;
       }
     });
+
+    return imc;
   }
 
   @override
@@ -122,57 +131,73 @@ class _MyHomePageState extends State<MyHomePage> {
         ),
       ),
       body: Center(
-        child: isLoading ? CircularProgressIndicator(color: Colors.black,) : Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            SizedBox(height: 50),
-            InputWidget(
-              onPressedLess: () => diminuiAltura(),
-              onPressedMore: () => aumentaAltura(),
-              unitLabel: 'cm',
-              valueLabel: altura.toString(),
-            ),
-            SizedBox(height: 50),
-            InputWidget(
-              onPressedLess: () => diminuiPeso(),
-              onPressedMore: () => aumentaPeso(),
-              unitLabel: 'Kg',
-              valueLabel: peso.toString(),
-            ),
-            SizedBox(height: 50),
-            ElevatedButton(
-              onPressed: () async {
-                atualizarResultado();
-                Navigator.of(context).push(
-                  MaterialPageRoute<void>(
-                    builder: (context) => ResultPage(
-                      resultado: resultado,
-                      limite_inferior: limite_inferior,
-                      limite_superior: limite_superior,
+        child: isLoading
+            ? CircularProgressIndicator(color: Colors.black)
+            : Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  SizedBox(height: 50),
+                  InputWidget(
+                    onPressedLess: () => diminuiAltura(),
+                    onPressedMore: () => aumentaAltura(),
+                    unitLabel: 'cm',
+                    valueLabel: altura.toString(),
+                  ),
+                  SizedBox(height: 50),
+                  InputWidget(
+                    onPressedLess: () => diminuiPeso(),
+                    onPressedMore: () => aumentaPeso(),
+                    unitLabel: 'Kg',
+                    valueLabel: peso.toString(),
+                  ),
+                  SizedBox(height: 50),
+                  ElevatedButton(
+                    onPressed: () async {
+                      final imc = atualizarResultado();
+                      Navigator.of(context).push(
+                        MaterialPageRoute<void>(
+                          builder: (context) => ResultPage(
+                            resultado: resultado,
+                            limite_inferior: limite_inferior,
+                            limite_superior: limite_superior,
+                          ),
+                        ),
+                      );
+                      await prefs.setInt('altura', altura);
+                      await prefs.setInt('peso', peso);
+                      /*await db.collection('historico_calculo').add({
+                        'altura': altura,
+                        'peso': peso,
+                        'resultado_imc': imc,
+                      });*/
+                      counter++;
+                      await db.collection('historico_calculo').doc('calculo_0$counter').set({
+                        'altura': altura,
+                        'peso': peso,
+                        'resultado_imc': imc,
+                      });
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.black,
+                      foregroundColor: Colors.white,
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 40,
+                        vertical: 10,
+                      ),
+                      child: Text(
+                        'Calcular',
+                        style: TextStyle(
+                          fontSize: 30,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                     ),
                   ),
-                );
-                await prefs.setInt('altura', altura);
-                await prefs.setInt('peso', peso);
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.black,
-                foregroundColor: Colors.white,
+                ],
               ),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 40,
-                  vertical: 10,
-                ),
-                child: Text(
-                  'Calcular',
-                  style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
-                ),
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }
