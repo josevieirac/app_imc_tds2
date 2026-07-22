@@ -1,3 +1,4 @@
+import 'package:app_imc/history_page.dart';
 import 'package:app_imc/input_widget.dart';
 import 'package:app_imc/result_page.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -43,7 +44,7 @@ class _MyHomePageState extends State<MyHomePage> {
   double limite_superior = 0;
   late final SharedPreferences prefs;
   FirebaseFirestore db = FirebaseFirestore.instance;
-  int counter = 1;
+  int counter = 5;
 
   bool isLoading = false;
 
@@ -129,6 +130,20 @@ class _MyHomePageState extends State<MyHomePage> {
           'App IMC - SENAC',
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 10),
+            child: IconButton(
+              onPressed: () => Navigator.push(
+                context,
+                MaterialPageRoute<void>(
+                  builder: (BuildContext context) => const HistoryPage(),
+                ),
+              ),
+              icon: Icon(Icons.history, size: 30),
+            ),
+          ),
+        ],
       ),
       body: Center(
         child: isLoading
@@ -172,11 +187,18 @@ class _MyHomePageState extends State<MyHomePage> {
                         'resultado_imc': imc,
                       });*/
                       counter++;
-                      await db.collection('historico_calculo').doc('calculo_0$counter').set({
-                        'altura': altura,
-                        'peso': peso,
-                        'resultado_imc': imc,
-                      });
+                      await db
+                          .collection('historico_calculo')
+                          .doc('calculo_0$counter')
+                          .set({
+                            'altura': altura,
+                            'peso': peso,
+                            'resultado_imc': imc,
+                          });
+                      final dados_salvos = await db
+                          .collection('historico_calculo')
+                          .get();
+                      print(dados_salvos);
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.black,
