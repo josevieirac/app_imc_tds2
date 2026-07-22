@@ -195,10 +195,6 @@ class _MyHomePageState extends State<MyHomePage> {
                             'peso': peso,
                             'resultado_imc': imc,
                           });
-                      final dados_salvos = await db
-                          .collection('historico_calculo')
-                          .get();
-                      print(dados_salvos);
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.black,
